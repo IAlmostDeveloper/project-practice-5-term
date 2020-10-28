@@ -1,12 +1,10 @@
 package server
 
 import (
-	"github.com/IAlmostDeveloper/project-practice-5-term/src/controllers"
-	"github.com/IAlmostDeveloper/project-practice-5-term/src/services"
-	"github.com/IAlmostDeveloper/project-practice-5-term/src/storage/interfaces"
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	"net/http"
+	"server/src/storage/interfaces"
 )
 
 type server struct {

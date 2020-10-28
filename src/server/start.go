@@ -3,11 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/IAlmostDeveloper/project-practice-5-term/src/storage/mysql_storage"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"net/http"
+	"server/src/storage/mysql_storage"
 )
 
 func Start(config *Config) error {
