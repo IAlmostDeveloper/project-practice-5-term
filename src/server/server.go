@@ -19,19 +19,9 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewServer(storage interfaces.StorageProvider, redis *redis.Client) *server {
-	validationService := services.NewValidationService()
 	server := &server{
 		router:  mux.NewRouter(),
 		storage: storage,
-		taskController: controllers.NewTaskController(
-			services.NewTaskService(storage),
-			validationService),
-		tagController: controllers.NewTagController(
-			services.NewTagService(storage),
-			validationService,
-			services.NewTaskService(storage)),
-		authController:     controllers.NewAuthController(services.NewGoogleAuthService(storage, redis)),
-		feedbackController: controllers.NewFeedbackController(services.NewFeedbackService(storage), validationService),
 	}
 
 	server.ConfigureRouter()
