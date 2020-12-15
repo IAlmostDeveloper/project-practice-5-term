@@ -6,8 +6,9 @@ USE ProjectServer;
 
 CREATE TABLE IF NOT EXISTS Users (
     UserId INT PRIMARY KEY AUTO_INCREMENT,
+    Email VARCHAR(40) UNIQUE NOT NULL,
     Login VARCHAR(20) UNIQUE NOT NULL,
-    HashedPassword NVARCHAR(32) NOT NULL,
+    HashedPassword NVARCHAR(32),
     FirstName NVARCHAR(30) NOT NULL,
     LastName NVARCHAR(30) NOT NULL,
     BirthDate DATE,
@@ -19,13 +20,14 @@ CREATE TABLE IF NOT EXISTS Users (
 
 CREATE TABLE IF NOT EXISTS MeditationExercises(
     ExerciseId INT PRIMARY KEY AUTO_INCREMENT,
-    Name VARCHAR(100) NOT NULL
-
+    Name VARCHAR(100) NOT NULL,
+    ExerciseTime INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS FocusingExercises(
     ExerciseId INT PRIMARY KEY AUTO_INCREMENT,
-    Name VARCHAR(100) NOT NULL
+    Name VARCHAR(100) NOT NULL,
+    ExerciseTime INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS MeditationExercisesStarted(
