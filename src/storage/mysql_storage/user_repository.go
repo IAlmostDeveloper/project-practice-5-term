@@ -11,12 +11,12 @@ type UserRepository struct {
 }
 
 func (repo *UserRepository) Create(user *dto.User) error {
-	insertStatement := "insert into `users`(`UserId`, `Email`, `Login`, `HashedPassword`, " +
+	insertStatement := "insert into `users`(`Email`, `Login`, `HashedPassword`, " +
 		"`FirstName`, `LastName`, `BirthDate`, `RegistrationDate`, `IsRegisteredWithGoogle`, " +
 		"`GoogleAccountData`, `AvatarPicture`) " +
-		"values(:user_id, :email, :login, :hashed_password, " +
-		":first_name, :last_name, :birth_date,:registration_date,  " +
-		":is_registered_with_google, :google_account_data, :avatar_picture)"
+		"values(:Email, :Login, :HashedPassword, " +
+		":FirstName, :LastName, :BirthDate,:RegistrationDate,  " +
+		":IsRegisteredWithGoogle, :GoogleAccountData, :AvatarPicture)"
 	if _, err := repo.db.NamedExec(insertStatement, user); err != nil {
 		return err
 	}
@@ -41,6 +41,18 @@ func (repo *UserRepository) GetByLogin(login string) (*dto.User, error) {
 	if err := repo.db.Get(user, selectStatement, login); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
+}
+
+func (repo *UserRepository) GetByLoginAndHashedPassword(login string, hashedPassword string) (*dto.User, error){
+	selectStatement := "SELECT * FROM `users` WHERE login = ? AND hashedpassword = ?"
+	user := &dto.User{}
+	if err := repo.db.Get(user, selectStatement, login, hashedPassword); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
 		}
 		return nil, err
 	}

@@ -1,19 +1,18 @@
 -- 00001_init_database.sql
 
 -- +goose Up
-CREATE DATABASE IF NOT EXISTS ProjectServer;
 USE ProjectServer;
 
 CREATE TABLE IF NOT EXISTS Users (
     UserId INT PRIMARY KEY AUTO_INCREMENT,
     Email VARCHAR(40) UNIQUE NOT NULL,
     Login VARCHAR(20) UNIQUE NOT NULL,
-    HashedPassword NVARCHAR(32),
+    HashedPassword NVARCHAR(100),
     FirstName NVARCHAR(30) NOT NULL,
     LastName NVARCHAR(30) NOT NULL,
-    BirthDate DATE,
+    BirthDate DATETIME,
     RegistrationDate DATETIME NOT NULL,
-    IsRegisteredWithGoogle BIT NOT NULL,
+    IsRegisteredWithGoogle NUMERIC NOT NULL,
     GoogleAccountData VARCHAR(500),
     AvatarPicture VARCHAR(150)
 );

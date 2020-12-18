@@ -1,8 +1,33 @@
 package controllers
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"net/http"
+	"os"
+	"server/src/dto"
 	"server/src/services/interfaces"
+	"time"
+)
+
+const (
+	contextKeyId = "userId"
+)
+
+var (
+	googleOauthConfig = &oauth2.Config{
+		RedirectURL:  "https://garage-best-team-ever.tk/google-callback",
+		ClientID:     os.Getenv("GOOGLE_AUTH_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_AUTH_CLIENT_SECRET"),
+		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/plus.me"},
+		Endpoint: google.Endpoint,
+	}
+	randomState = "random"
 )
 
 type UserController struct{
@@ -19,17 +44,105 @@ func NewUserController(userService interfaces.UserServiceProvider,
 }
 
 func (controller *UserController) Authenticate (writer http.ResponseWriter, request *http.Request){
-
+	var user dto.User
+	if err := json.NewDecoder(request.Body).Decode(&user); err != nil {
+		errorJsonRespond(writer, http.StatusBadRequest, errJsonDecode)
+		return
+	}
+	// Не ввожу поле "Password", поначалу нехешированый пароль попадает в это поле
+	user.HashedPassword = controller.passwordService.EncodePassword(user.HashedPassword)
+	// В AuthenticateUser попадает уже хешированный пароль
+	accessToken, err := controller.userService.AuthenticateUser(&user)
+	if err != nil{
+		if err == errInvalidUserData{
+			errorJsonRespond(writer, http.StatusBadRequest, err)
+			return
+		}
+		errorJsonRespond(writer, http.StatusInternalServerError, err)
+		return
+	}
+	respondJson(writer, http.StatusOK, accessToken)
+}
+func (controller *UserController) Register (writer http.ResponseWriter, request *http.Request){
+	var user dto.User
+	if err := json.NewDecoder(request.Body).Decode(&user); err != nil {
+		errorJsonRespond(writer, http.StatusBadRequest, errJsonDecode)
+		return
+	}
+	// Не ввожу поле "Password", поначалу нехешированый пароль попадает в это поле
+	user.HashedPassword = controller.passwordService.EncodePassword(user.HashedPassword)
+	// В RegisterUser попадает уже хешированный пароль
+	if err := controller.userService.RegisterUser(&user); err != nil{
+		errorJsonRespond(writer, http.StatusInternalServerError, err)
+		return
+	}
+	respondJson(writer, http.StatusCreated, user)
 }
 
 func (controller *UserController) AuthenticateWithGoogle (writer http.ResponseWriter, request *http.Request){
-
+	url := googleOauthConfig.AuthCodeURL(randomState)
+	fmt.Println(url)
+	http.Redirect(writer, request, url, http.StatusTemporaryRedirect)
 }
 
-func (controller *UserController) Register (writer http.ResponseWriter, request *http.Request){
+func (controller *UserController) GoogleCallback(writer http.ResponseWriter, request *http.Request) {
+	if request.FormValue("state") != randomState {
+		fmt.Println("state is not valid")
+		http.Redirect(writer, request, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	token, err := googleOauthConfig.Exchange(oauth2.NoContext, request.FormValue("code"))
+	if err != nil {
+		fmt.Printf("could not get token : %s \n", err.Error())
+		http.Redirect(writer, request, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	if err != nil {
+		fmt.Printf("could not create get request : %s \n", err.Error())
+		http.Redirect(writer, request, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	defer resp.Body.Close()
+	user := &dto.User{}
+	if err := json.NewDecoder(resp.Body).Decode(user); err != nil {
+		errorJsonRespond(writer, http.StatusBadRequest, errJsonDecode)
+		return
+	}
+	// create user if not exist
+	if err := controller.userService.RegisterUser(user); err != nil {
+		errorJsonRespond(writer, http.StatusBadRequest, err)
+		return
+	}
 
+	accessToken, err := controller.userService.GenerateAndSaveToken(user)
+	if err != nil {
+		errorJsonRespond(writer, http.StatusInternalServerError, err)
+		return
+	}
+
+	http.SetCookie(writer, &http.Cookie{
+		Name:       "accessToken",
+		Value:      accessToken,
+		Path:       "/",
+		RawExpires: time.Now().Add(controller.userService.GetAccessTokenTTL()).String(),
+	})
+
+	http.Redirect(writer, request, "/", http.StatusTemporaryRedirect)
 }
 
-func (controller *UserController) Authorize (writer http.ResponseWriter, request *http.Request){
-
+func (controller *UserController) AuthorizationMW(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenCookie, err := r.Cookie("accessToken")
+		if err != nil {
+			errorJsonRespond(w, http.StatusUnauthorized, err)
+			return
+		}
+		userId, err := controller.userService.AuthorizeUser(tokenCookie.Value)
+		if err != nil {
+			errorJsonRespond(w, http.StatusUnauthorized, err)
+			return
+		}
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), contextKeyId, userId)))
+	})
 }

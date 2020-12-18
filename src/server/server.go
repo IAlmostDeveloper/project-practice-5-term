@@ -24,7 +24,8 @@ func NewServer(storage interfaces.StorageProvider, redis *redis.Client) *server 
 		router:  mux.NewRouter(),
 		storage: storage,
 		userController: controllers.NewUserController(
-			services.NewUserService(storage, redis)),
+			services.NewUserService(storage, redis), services.NewPasswordService(),
+			),
 	}
 
 	server.ConfigureRouter()
