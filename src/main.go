@@ -7,9 +7,11 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"server/src/server"
+	"time"
 )
 
 func main() {
+	time.Sleep(time.Second * 10)
 	flag.Parse()
 	config := &server.Config{}
 

@@ -47,6 +47,18 @@ func (repo *UserRepository) GetByLogin(login string) (*dto.User, error) {
 	return user, nil
 }
 
+func (repo *UserRepository) GetByEmail(email string) (*dto.User, error) {
+	selectStatement := "SELECT * FROM `users` WHERE email = ?"
+	user := &dto.User{}
+	if err := repo.db.Get(user, selectStatement, email); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
+}
+
 func (repo *UserRepository) GetByLoginAndHashedPassword(login string, hashedPassword string) (*dto.User, error){
 	selectStatement := "SELECT * FROM `users` WHERE login = ? AND hashedpassword = ?"
 	user := &dto.User{}

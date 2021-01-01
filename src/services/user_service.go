@@ -46,16 +46,21 @@ func (s *UserService) AuthenticateUser(user *dto.User) (string, error) {
 	if err != nil {
 		return "", errInvalidUserData
 	}
+	s.AccessTokenTTL = time.Second * 3600
 	return s.GenerateAndSaveToken(user)
 }
 
 func (s *UserService) RegisterUser(user *dto.User) error {
-	storageUser, err := s.storage.UserRepository().GetByLogin(user.Login)
+	storageUser, err := s.storage.UserRepository().GetByEmail(user.Email)
 	if err != nil {
 		return err
 	}
 	if storageUser != nil {
 		return errUserAlreadyExists
+	}
+	user.RegistrationDate = new(dto.TimeJson)
+	if err = user.RegistrationDate.UnmarshalJSON([]byte(time.Now().Add(5).Format(dto.DateFormat))); err != nil{
+		return err
 	}
 	if err := s.storage.UserRepository().Create(user); err != nil {
 		return err
