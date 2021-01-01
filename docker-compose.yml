@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  server:
+    container_name: server
+    image: ialmostdeveloper/project-practice-5-term
+    environment:
+      - GOOGLE_AUTH_CLIENT_ID
+      - GOOGLE_AUTH_CLIENT_SECRET
+    ports:
+      - 127.0.0.1:8080:8080
+    restart: always
+  mysql-db:
+    container_name: mysql-db
+    image: mysql:8.0
+    ports:
+      - 3306
+    restart: always
+    environment:
+        MYSQL_USER: 'root'
+        MYSQL_ROOT_PASSWORD: 'root'
+        MYSQL_DATABASE: 'ProjectServer'
+  redis:
+    container_name: redis-db
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
