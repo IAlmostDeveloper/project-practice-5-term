@@ -10,6 +10,7 @@ import (
 	"os"
 	"server/src/dto"
 	"server/src/services/interfaces"
+	"strings"
 	"time"
 )
 
@@ -112,10 +113,22 @@ func (controller *UserController) GoogleCallback(writer http.ResponseWriter, req
 	}
 	defer resp.Body.Close()
 	user := &dto.User{}
-	if err := json.NewDecoder(resp.Body).Decode(user); err != nil {
+	googleUser := &struct {
+		Email     string `json:"email"`
+		FirstName string `json:"given_name"`
+		LastName  string `json:"family_name"`
+		Picture   string `json:"picture"`
+	}{}
+	if err := json.NewDecoder(resp.Body).Decode(googleUser); err != nil {
 		errorJsonRespond(writer, http.StatusBadRequest, errJsonDecode)
 		return
 	}
+	user.Email = googleUser.Email
+	user.Login = strings.Split(googleUser.Email, "@")[0]
+	user.FirstName = googleUser.FirstName
+	user.LastName = googleUser.LastName
+	user.IsRegisteredWithGoogle = true
+	user.AvatarPicture = googleUser.Picture
 
 	// create user if not exist
 	if err := controller.userService.RegisterUser(user); err != nil {
