@@ -11,7 +11,8 @@ import (
 )
 
 func main() {
-	time.Sleep(time.Second * 10)
+	// Задержка для запуска в docker-compose, пока стартуют redis и mysql
+	time.Sleep(time.Second * 5)
 	flag.Parse()
 	config := &server.Config{}
 

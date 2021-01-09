@@ -10,9 +10,11 @@ import (
 )
 
 type server struct {
-	router         *mux.Router
-	storage        interfaces.StorageProvider
-	userController *controllers.UserController
+	router             *mux.Router
+	storage            interfaces.StorageProvider
+	userController     *controllers.UserController
+	exerciseController *controllers.ExerciseController
+	articleController *controllers.ArticleController
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +27,9 @@ func NewServer(storage interfaces.StorageProvider, redis *redis.Client) *server 
 		storage: storage,
 		userController: controllers.NewUserController(
 			services.NewUserService(storage, redis), services.NewPasswordService(),
-			),
+		),
+		exerciseController: controllers.NewExerciseController(services.NewExerciseService(storage)),
+		articleController: controllers.NewArticleController(services.NewArticleService(storage)),
 	}
 
 	server.ConfigureRouter()
