@@ -46,7 +46,7 @@ func (s *UserService) AuthenticateUser(user *dto.User) (string, error) {
 	if err != nil {
 		return "", errInvalidUserData
 	}
-	s.AccessTokenTTL = time.Second * 3600
+	s.AccessTokenTTL = time.Hour * 1
 	return s.GenerateAndSaveToken(user)
 }
 
@@ -59,7 +59,7 @@ func (s *UserService) RegisterUser(user *dto.User) error {
 		return errUserAlreadyExists
 	}
 	user.RegistrationDate = new(dto.TimeJson)
-	if err = user.RegistrationDate.UnmarshalJSON([]byte(time.Now().Add(5).Format(dto.DateFormat))); err != nil{
+	if err = user.RegistrationDate.UnmarshalJSON([]byte(time.Now().Add(5).Format(dto.DateFormat))); err != nil {
 		return err
 	}
 	if err := s.storage.UserRepository().Create(user); err != nil {
@@ -109,4 +109,20 @@ func (s *UserService) saveToken(user *dto.User, accessToken string) error {
 	s.redis.Set(context.Background(), accessToken, user.UserId, s.AccessTokenTTL)
 	res := s.redis.Save(context.Background())
 	return res.Err()
+}
+
+func (s *UserService) GetUserArticles(userId string) ([]*dto.Article, error) {
+	return s.storage.UserRepository().GetUserArticles(userId)
+}
+
+func (s *UserService) GetUserFocusingExercises(userId string) ([]*dto.FocusingExercise, error) {
+	return s.storage.UserRepository().GetUserFocusingExercises(userId)
+}
+
+func (s *UserService) GetUserMeditationExercises(userId string) ([]*dto.MeditationExercise, error) {
+	return s.storage.UserRepository().GetUserMeditationExercises(userId)
+}
+
+func (s *UserService) GetUserAchievements(userId string) ([]*dto.Achievement, error) {
+	return s.storage.UserRepository().GetUserAchievements(userId)
 }

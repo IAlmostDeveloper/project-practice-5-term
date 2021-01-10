@@ -8,6 +8,8 @@ import (
 type Storage struct {
 	db             *sqlx.DB
 	userRepository interfaces.UserRepositoryProvider
+	exerciseRepository interfaces.ExerciseRepositoryProvider
+	articleRepository interfaces.ArticleRepositoryProvider
 }
 
 func New(db *sqlx.DB) *Storage {
@@ -26,4 +28,28 @@ func (storage *Storage) UserRepository() interfaces.UserRepositoryProvider {
 	}
 
 	return storage.userRepository
+}
+
+func (storage *Storage) ExerciseRepository() interfaces.ExerciseRepositoryProvider {
+	if storage.exerciseRepository != nil {
+		return storage.exerciseRepository
+	}
+
+	storage.exerciseRepository = &ExerciseRepository{
+		db: storage.db,
+	}
+
+	return storage.exerciseRepository
+}
+
+func (storage *Storage) ArticleRepository() interfaces.ArticleRepositoryProvider {
+	if storage.articleRepository != nil {
+		return storage.articleRepository
+	}
+
+	storage.articleRepository = &ArticleRepository{
+		db: storage.db,
+	}
+
+	return storage.articleRepository
 }

@@ -10,4 +10,8 @@ type UserRepositoryProvider interface {
 	GetByLoginAndHashedPassword(login string, hashedPassword string) (*dto.User, error)
 	Update(user *dto.User) error
 	RemoveById(id string) error
+	GetUserArticles(userId string) ([]*dto.Article, error)
+	GetUserFocusingExercises(userId string) ([]*dto.FocusingExercise, error)
+	GetUserMeditationExercises(userId string) ([]*dto.MeditationExercise, error)
+	GetUserAchievements(userId string) ([]*dto.Achievement, error)
 }
