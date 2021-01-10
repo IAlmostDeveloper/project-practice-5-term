@@ -10,6 +10,7 @@ type Storage struct {
 	userRepository interfaces.UserRepositoryProvider
 	exerciseRepository interfaces.ExerciseRepositoryProvider
 	articleRepository interfaces.ArticleRepositoryProvider
+	achievementRepository interfaces.AchievementRepositoryProvider
 }
 
 func New(db *sqlx.DB) *Storage {
@@ -52,4 +53,16 @@ func (storage *Storage) ArticleRepository() interfaces.ArticleRepositoryProvider
 	}
 
 	return storage.articleRepository
+}
+
+func (storage *Storage) AchievementRepository() interfaces.AchievementRepositoryProvider {
+	if storage.achievementRepository != nil {
+		return storage.achievementRepository
+	}
+
+	storage.achievementRepository = &AchievementRepository{
+		db: storage.db,
+	}
+
+	return storage.achievementRepository
 }
