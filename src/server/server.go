@@ -15,6 +15,7 @@ type server struct {
 	userController     *controllers.UserController
 	exerciseController *controllers.ExerciseController
 	articleController *controllers.ArticleController
+	achievementController *controllers.AchievementController
 }
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +31,7 @@ func NewServer(storage interfaces.StorageProvider, redis *redis.Client) *server 
 		),
 		exerciseController: controllers.NewExerciseController(services.NewExerciseService(storage)),
 		articleController: controllers.NewArticleController(services.NewArticleService(storage)),
+		achievementController: controllers.NewAchievementController(services.NewAchievementService(storage)),
 	}
 
 	server.ConfigureRouter()

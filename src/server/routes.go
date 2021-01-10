@@ -18,13 +18,45 @@ func (s *server) ConfigureRouter() {
 	//deleteRouter := s.router.Methods(http.MethodDelete, http.MethodOptions).Subrouter()
 	//putRouter := s.router.Methods(http.MethodPut, http.MethodOptions).Subrouter()
 
-	getRouter.HandleFunc("/", HelloWorld)
-	getRouter.HandleFunc("/profile", s.userController.AuthorizationMW(s.userController.GetUserProfile))
+	// Example
+	//getRouter.HandleFunc("/", HelloWorld)
+	//getRouter.HandleFunc("/task/{id:[0-9]+}", s.authController.AuthorizationMW(s.authController.AuthorizationMW(s.taskController.GetTaskByID)))
+	//getRouter.HandleFunc("/task", s.authController.AuthorizationMW(s.taskController.GetTasks))
+	//getRouter.HandleFunc("/whoami", s.authController.AuthorizationMW(s.authController.GetUser))
+	//getRouter.HandleFunc("/google-auth", s.authController.GoogleLogin)
+	//getRouter.HandleFunc("/google-callback", s.authController.GoogleCallback)
+	//getRouter.HandleFunc("/feedback", s.feedbackController.GetAllFeedback)
+	//
+	//postRouter.HandleFunc("/task", s.authController.AuthorizationMW(s.taskController.CreateTask))
+	//postRouter.HandleFunc("/tag", s.authController.AuthorizationMW(s.tagController.AddToTask))
+	//postRouter.HandleFunc("/feedback", s.feedbackController.AddFeedback)
+	//
+	//deleteRouter.HandleFunc("/task/{id:[0-9]+}", s.authController.AuthorizationMW(s.taskController.RemoveTaskByID))
+	//deleteRouter.HandleFunc("/tag", s.authController.AuthorizationMW(s.tagController.RemoveFromTask))
+	//
+	//putRouter.HandleFunc("/task/{id:[0-9]+}", s.authController.AuthorizationMW(s.taskController.UpdateTask))
+	// End of Example
 
-	postRouter.HandleFunc("/register", s.userController.Register)
-	postRouter.HandleFunc("/authenticate", s.userController.Authenticate)
+	// Эндпоинты для аутентификации и регистрации
+	getRouter.HandleFunc("/", HelloWorld)
 	getRouter.HandleFunc("/google-auth", s.userController.AuthenticateWithGoogle)
 	getRouter.HandleFunc("/google-callback", s.userController.GoogleCallback)
+	postRouter.HandleFunc("/register", s.userController.Register)
+	postRouter.HandleFunc("/authenticate", s.userController.Authenticate)
+
+	// Эндпоинты для данных пользователя
+	getRouter.HandleFunc("/profile", s.userController.AuthorizationMW(s.userController.GetUserProfile))
+	getRouter.HandleFunc("/user/achievements", s.userController.AuthorizationMW(s.userController.GetUserAchievements))
+	getRouter.HandleFunc("/user/articles", s.userController.AuthorizationMW(nil))
+	// Эндпоинты для медитаций
+	getRouter.HandleFunc("/meditation", s.userController.AuthorizationMW(nil))
+	// Эндпоинты для фокусировок
+	getRouter.HandleFunc("/focusing", s.userController.AuthorizationMW(nil))
+	// Эндпоинты для ачивок
+	getRouter.HandleFunc("/achievements", s.userController.AuthorizationMW(s.achievementController.GetAllAchievements))
+	postRouter.HandleFunc("/achievement/{id:[0-9]+}", s.userController.AuthorizationMW(s.achievementController.CompleteAchievement))
+
+
 }
 
 func HelloWorld(writer http.ResponseWriter, request *http.Request) {

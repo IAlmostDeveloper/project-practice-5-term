@@ -20,7 +20,8 @@ const (
 
 var (
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/google-callback",
+		//RedirectURL:  "http://localhost:8080/google-callback",
+		RedirectURL:  "https://soulfire.azurewebsites.net/google-callback",
 		ClientID:     os.Getenv("GOOGLE_AUTH_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_AUTH_CLIENT_SECRET"),
 		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
@@ -42,6 +43,22 @@ func NewUserController(userService interfaces.UserServiceProvider,
 		userService,
 		passwordService,
 	}
+}
+
+func (controller *UserController) AuthorizationMW(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenCookie, err := r.Cookie("accessToken")
+		if err != nil {
+			errorJsonRespond(w, http.StatusUnauthorized, err)
+			return
+		}
+		userId, err := controller.userService.AuthorizeUser(tokenCookie.Value)
+		if err != nil {
+			errorJsonRespond(w, http.StatusUnauthorized, err)
+			return
+		}
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), contextKeyId, userId)))
+	})
 }
 
 func (controller *UserController) Authenticate(writer http.ResponseWriter, request *http.Request) {
@@ -177,18 +194,16 @@ func (controller *UserController) GetUserProfile(writer http.ResponseWriter, req
 	respondJson(writer, http.StatusOK, result)
 }
 
-func (controller *UserController) AuthorizationMW(next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenCookie, err := r.Cookie("accessToken")
-		if err != nil {
-			errorJsonRespond(w, http.StatusUnauthorized, err)
-			return
-		}
-		userId, err := controller.userService.AuthorizeUser(tokenCookie.Value)
-		if err != nil {
-			errorJsonRespond(w, http.StatusUnauthorized, err)
-			return
-		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), contextKeyId, userId)))
-	})
+func (controller *UserController) GetUserAchievements(writer http.ResponseWriter, request *http.Request){
+	result , err := controller.userService.GetUserAchievements(request.Context().Value(contextKeyId).(string))
+	if err != nil {
+		errorJsonRespond(writer, http.StatusBadRequest, errNotFound)
+		return
+	}
+	respondJson(writer, http.StatusOK, result)
+	return
 }
+
+
+
+

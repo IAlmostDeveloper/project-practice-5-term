@@ -6,23 +6,33 @@ import (
 	"server/src/dto"
 )
 
-type AchievementRepository struct{
+type AchievementRepository struct {
 	db *sqlx.DB
 }
 
-func (repo *AchievementRepository) GetAchievementById(id int) (*dto.Achievement, error){
+func (repo *AchievementRepository) GetAchievementById(id int) (*dto.Achievement, error) {
 	selectStatement := "SELECT * FROM `Achievements` WHERE AchievementId = ?"
-	exercise := &dto.Achievement{}
-	if err := repo.db.Get(exercise, selectStatement, id); err != nil {
+	achievement := &dto.Achievement{}
+	if err := repo.db.Get(achievement, selectStatement, id); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return exercise, nil
+	return achievement, nil
 }
 
-func (repo *AchievementRepository) CompleteAchievement(id int, userId int, achieveDate *dto.TimeJson) error{
+func (repo *AchievementRepository) GetAllAchievements() ([]*dto.Achievement, error) {
+	selectStatement := "SELECT AchievementId, Name, Description FROM Achievements"
+	achievements := &[]*dto.Achievement{}
+	err := repo.db.Select(achievements, selectStatement)
+	if err != nil {
+		return nil, err
+	}
+	return *achievements, err
+}
+
+func (repo *AchievementRepository) CompleteAchievement(id int, userId int, achieveDate *dto.TimeJson) error {
 	insertStatement := "INSERT INTO `AchievementsAchieved` (AchievementId, UserId, AchieveDate) VALUES (?, ?, ?)"
 	if _, err := repo.db.Exec(insertStatement, id, userId, achieveDate); err != nil {
 		return err

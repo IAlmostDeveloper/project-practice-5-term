@@ -11,7 +11,7 @@ type UserRepository struct {
 }
 
 func (repo *UserRepository) Create(user *dto.User) error {
-	insertStatement := "insert into `Users`(`Email`, `Login`, `HashedPassword`, " +
+	insertStatement := "insert into Users (`Email`, `Login`, `HashedPassword`, " +
 		"`FirstName`, `LastName`, `BirthDate`, `RegistrationDate`, `IsRegisteredWithGoogle`, " +
 		"`GoogleAccountData`, `AvatarPicture`) " +
 		"values(:Email, :Login, :HashedPassword, " +
@@ -24,7 +24,7 @@ func (repo *UserRepository) Create(user *dto.User) error {
 }
 
 func (repo *UserRepository) GetById(userId string) (*dto.User, error) {
-	selectStatement := "SELECT * FROM `Users` WHERE UserId = ?"
+	selectStatement := "SELECT * FROM Users WHERE UserId = ?"
 	user := &dto.User{}
 	if err := repo.db.Get(user, selectStatement, userId); err != nil {
 		if err == sql.ErrNoRows {
@@ -36,7 +36,7 @@ func (repo *UserRepository) GetById(userId string) (*dto.User, error) {
 }
 
 func (repo *UserRepository) GetByLogin(login string) (*dto.User, error) {
-	selectStatement := "SELECT * FROM `Users` WHERE Login = ?"
+	selectStatement := "SELECT * FROM Users WHERE Login = ?"
 	user := &dto.User{}
 	if err := repo.db.Get(user, selectStatement, login); err != nil {
 		if err == sql.ErrNoRows {
@@ -48,7 +48,7 @@ func (repo *UserRepository) GetByLogin(login string) (*dto.User, error) {
 }
 
 func (repo *UserRepository) GetByEmail(email string) (*dto.User, error) {
-	selectStatement := "SELECT * FROM `Users` WHERE Email = ?"
+	selectStatement := "SELECT * FROM Users WHERE Email = ?"
 	user := &dto.User{}
 	if err := repo.db.Get(user, selectStatement, email); err != nil {
 		if err == sql.ErrNoRows {
@@ -60,7 +60,7 @@ func (repo *UserRepository) GetByEmail(email string) (*dto.User, error) {
 }
 
 func (repo *UserRepository) GetByLoginAndHashedPassword(login string, hashedPassword string) (*dto.User, error) {
-	selectStatement := "SELECT * FROM `Users` WHERE Login = ? AND HashedPassword = ?"
+	selectStatement := "SELECT * FROM Users WHERE Login = ? AND HashedPassword = ?"
 	user := &dto.User{}
 	if err := repo.db.Get(user, selectStatement, login, hashedPassword); err != nil {
 		if err == sql.ErrNoRows {
@@ -72,7 +72,7 @@ func (repo *UserRepository) GetByLoginAndHashedPassword(login string, hashedPass
 }
 
 func (repo *UserRepository) Update(user *dto.User) error {
-	updateStatement := "update `Users` set `email` = :email, `hashedpassword` = :hashed_password" +
+	updateStatement := "update Users set `email` = :email, `hashedpassword` = :hashed_password" +
 		"`firstname` = :first_name, `lastname` = :last_name, `birthdate` = :birth_date," +
 		" `registrationdate` = :registration_date, `avatarpicture` = :avatar_picture" +
 		" where `userid` = :user_id"
@@ -83,7 +83,7 @@ func (repo *UserRepository) Update(user *dto.User) error {
 }
 
 func (repo *UserRepository) RemoveById(userId string) error {
-	deleteStatement := "DELETE FROM `Users` WHERE UserId = ?"
+	deleteStatement := "DELETE FROM Users WHERE UserId = ?"
 	if _, err := repo.db.Exec(deleteStatement, userId); err != nil {
 		return err
 	}

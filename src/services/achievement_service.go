@@ -17,6 +17,10 @@ func (s *AchievementService) GetAchievementById(id int) (*dto.Achievement, error
 	return s.storage.AchievementRepository().GetAchievementById(id)
 }
 
+func (s *AchievementService) GetAllAchievements() ([]*dto.Achievement, error){
+	return s.storage.AchievementRepository().GetAllAchievements()
+}
+
 func (s *AchievementService) CompleteAchievement(id int, userId int, achieveDate *dto.TimeJson) error {
 	return s.storage.AchievementRepository().CompleteAchievement(id, userId, achieveDate)
 }
