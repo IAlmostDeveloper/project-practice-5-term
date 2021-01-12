@@ -16,4 +16,6 @@ type UserServiceProvider interface {
 	GetUserFocusingExercises(userId string) ([]*dto.FocusingExercise, error)
 	GetUserMeditationExercises(userId string) ([]*dto.MeditationExercise, error)
 	GetUserAchievements(userId string) ([]*dto.Achievement, error)
+	GetUserPreferences(userId string) ([]string, error)
+	AddUserPreference(userId string, preferenceName string) error
 }

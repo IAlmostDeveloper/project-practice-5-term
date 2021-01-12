@@ -31,3 +31,16 @@ func (repo *ArticleRepository) GetAvailableArticles() ([]*dto.Article, error) {
 	}
 	return *articles, err
 }
+
+func (repo *ArticleRepository) GetArticlesForUser(userId int) ([]*dto.Article, error){
+	selectStatement := "SELECT a.ArticleId, a.Name, a.Content, a.CreateDate FROM Articles as a " +
+		"inner join ArticleCategories as ac on a.ArticleId=ac.ArticleId" +
+		"inner join UserPreferences as up on ac.Name=up.Name" +
+		"where up.UserId=?"
+	articles := &[]*dto.Article{}
+	err := repo.db.Select(articles, selectStatement, userId)
+	if err != nil {
+		return nil, err
+	}
+	return *articles, err
+}

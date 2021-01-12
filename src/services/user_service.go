@@ -126,3 +126,10 @@ func (s *UserService) GetUserMeditationExercises(userId string) ([]*dto.Meditati
 func (s *UserService) GetUserAchievements(userId string) ([]*dto.Achievement, error) {
 	return s.storage.UserRepository().GetUserAchievements(userId)
 }
+
+func (s *UserService)GetUserPreferences(userId string) ([]string, error){
+	return s.storage.UserRepository().GetUserPreferences(userId)
+}
+func (s *UserService) AddUserPreference(userId string, preferenceName string) error{
+	return s.storage.UserRepository().AddUserPreference(userId, preferenceName)
+}

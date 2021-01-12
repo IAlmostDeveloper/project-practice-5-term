@@ -129,3 +129,20 @@ func (repo *UserRepository) GetUserAchievements(userId string) ([]*dto.Achieveme
 	}
 	return *exercises, err
 }
+
+func (repo *UserRepository) GetUserPreferences(userId string) ([]string, error){
+	selectStatement := "SELECT Name FROM UserPreferences where UserId=?"
+	preferences := &[]string{}
+	err := repo.db.Select(preferences, selectStatement, userId)
+	if err != nil {
+		return nil, err
+	}
+	return *preferences, err
+}
+func (repo *UserRepository) AddUserPreference(userId string, preferenceName string) error{
+	insertStatement := "INSERT INTO UserPreferences (Name, UserId) VALUES (?, ?)"
+	if _, err := repo.db.Exec(insertStatement, preferenceName, userId); err != nil {
+		return err
+	}
+	return nil
+}
