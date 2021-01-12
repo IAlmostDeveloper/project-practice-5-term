@@ -47,7 +47,11 @@ func (s *server) ConfigureRouter() {
 	// Эндпоинты для данных пользователя
 	getRouter.HandleFunc("/profile", s.userController.AuthorizationMW(s.userController.GetUserProfile))
 	getRouter.HandleFunc("/user/achievements", s.userController.AuthorizationMW(s.userController.GetUserAchievements))
-	getRouter.HandleFunc("/user/articles", s.userController.AuthorizationMW(nil))
+	getRouter.HandleFunc("/user/articles", s.userController.AuthorizationMW(s.userController.GetUserArticles))
+	// Эндпоинты для статей
+	getRouter.HandleFunc("/articles/recommended", s.userController.AuthorizationMW(s.articleController.GetArticlesForUser))
+	getRouter.HandleFunc("/articles", s.userController.AuthorizationMW(s.articleController.GetAvailableArticles))
+	getRouter.HandleFunc("/articles/{id:[0-9]+", s.userController.AuthorizationMW(s.articleController.GetArticleById))
 	// Эндпоинты для медитаций
 	getRouter.HandleFunc("/meditation", s.userController.AuthorizationMW(nil))
 	// Эндпоинты для фокусировок

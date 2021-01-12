@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"net/http"
@@ -20,8 +21,8 @@ const (
 
 var (
 	googleOauthConfig = &oauth2.Config{
-		//RedirectURL:  "http://localhost:8080/google-callback",
-		RedirectURL:  "https://soulfire.azurewebsites.net/google-callback",
+		RedirectURL: "http://localhost:8080/google-callback",
+		//RedirectURL:  "https://soulfire.azurewebsites.net/google-callback",
 		ClientID:     os.Getenv("GOOGLE_AUTH_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_AUTH_CLIENT_SECRET"),
 		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
@@ -194,16 +195,42 @@ func (controller *UserController) GetUserProfile(writer http.ResponseWriter, req
 	respondJson(writer, http.StatusOK, result)
 }
 
-func (controller *UserController) GetUserAchievements(writer http.ResponseWriter, request *http.Request){
-	result , err := controller.userService.GetUserAchievements(request.Context().Value(contextKeyId).(string))
+func (controller *UserController) GetUserAchievements(writer http.ResponseWriter, request *http.Request) {
+	result, err := controller.userService.GetUserAchievements(request.Context().Value(contextKeyId).(string))
 	if err != nil {
-		errorJsonRespond(writer, http.StatusBadRequest, errNotFound)
+		errorJsonRespond(writer, http.StatusBadRequest, err)
 		return
 	}
 	respondJson(writer, http.StatusOK, result)
 	return
 }
 
+func (controller *UserController) GetUserPreferences(writer http.ResponseWriter, request *http.Request) {
+	result, err := controller.userService.GetUserPreferences(request.Context().Value(contextKeyId).(string))
+	if err != nil {
+		errorJsonRespond(writer, http.StatusBadRequest, err)
+		return
+	}
+	respondJson(writer, http.StatusOK, result)
+	return
+}
 
+func (controller *UserController) GetUserArticles(writer http.ResponseWriter, request *http.Request){
+	result, err := controller.userService.GetUserArticles(request.Context().Value(contextKeyId).(string))
+	if err != nil {
+		errorJsonRespond(writer, http.StatusInternalServerError, err)
+		return
+	}
+	respondJson(writer, http.StatusOK, result)
+	return
+}
 
-
+func (controller *UserController) AddUserPreference(writer http.ResponseWriter, request *http.Request) {
+	preference := mux.Vars(request)["preference"]
+	if err := controller.userService.AddUserPreference(request.Context().Value(contextKeyId).(string), preference); err != nil {
+		errorJsonRespond(writer, http.StatusBadRequest, err)
+		return
+	}
+	respondJson(writer, http.StatusOK, preference)
+	return
+}
