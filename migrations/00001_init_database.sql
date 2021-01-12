@@ -17,6 +17,16 @@ CREATE TABLE IF NOT EXISTS Users
     AvatarPicture          VARCHAR(150)
 );
 
+CREATE TABLE IF NOT EXISTS UserPreferences
+(
+    Id     INT PRIMARY KEY AUTO_INCREMENT,
+    Name   VARCHAR(100) NOT NULL,
+    UserId INT         NOT NULL
+);
+
+ALTER TABLE UserPreferences
+    ADD UNIQUE UserPreference (Name, UserId);
+
 CREATE TABLE IF NOT EXISTS MeditationExercises
 (
     ExerciseId   INT PRIMARY KEY AUTO_INCREMENT,
@@ -74,6 +84,13 @@ CREATE TABLE IF NOT EXISTS Articles
     CreateDate DATETIME     NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS ArticleCategories
+(
+    Id        INT PRIMARY KEY AUTO_INCREMENT,
+    ArticleId INT          NOT NULL,
+    Name      VARCHAR(100) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS ArticleMedia
 (
     MediaId   INT PRIMARY KEY AUTO_INCREMENT,
@@ -89,7 +106,6 @@ CREATE TABLE IF NOT EXISTS ArticlesSaved
     UserId    INT      NOT NULL,
     SaveDate  DATETIME NOT NULL
 );
-
 
 -- +goose Down
 DROP DATABASE ProjectServer;
