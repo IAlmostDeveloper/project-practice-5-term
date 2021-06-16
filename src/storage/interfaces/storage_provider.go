@@ -5,4 +5,5 @@ type StorageProvider interface {
 	ExerciseRepository() ExerciseRepositoryProvider
 	ArticleRepository() ArticleRepositoryProvider
 	AchievementRepository() AchievementRepositoryProvider
+	QuotesRepository() QuotesRepositoryProvider
 }
